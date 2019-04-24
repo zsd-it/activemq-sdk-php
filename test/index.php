@@ -37,7 +37,7 @@ class Test
         $endPoint = 'localhost';
         $userName = 'admin';
         $password = 'admin';
-        $mq       = new \MQ\Mq($endPoint, $userName, $password);
+        $mq       = new \Mq\Mq($endPoint, $userName, $password);
 
         $topic   = $mq->getQueue('sms.send');
         $message = 'test ' . date('Y-m-d H:i:s');
@@ -66,6 +66,6 @@ class Test
 }
 
 $test = new Test();
-//$test->sendQueue();
+$test->sendQueue();
 
-$test->getQueue();
+//$test->getQueue();

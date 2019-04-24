@@ -1,6 +1,6 @@
 <?php
 
-namespace MQ;
+namespace Mq;
 
 define('MQ_SDK_VERSION', '0.1.0');
 
