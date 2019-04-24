@@ -61,17 +61,35 @@ $msgId = $queue->sendMessage($message);
 ```php
 <?php
 $msg = $queue->receiveMessage($pollingWaitSeconds);
+// 获取消息体
+if (!is_null($msg)) {
+    $string = $msg->getBody();
+}
+
 ```
 
 参数
 * pollingWaitSeconds: 长连接等待时长（秒) ,默认 3 秒
 
 返回值：
-* string | null
+* 消息对象 | null
+
+
+## 确认消息
+
+特性：
+* 拉取消息后，消费端处理完后需要显式删除该消息，否则超时后，消息将会重新可见，导致重复消费。
+
+
+```php
+$queue->deleteMessage($message);
+```
+参数：
+* message：消息对象
 
 
 
-获取一个主题
+##获取一个主题
 ```php 
 <?php
 $topic = $qbus->getTopic($topicName);

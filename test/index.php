@@ -51,10 +51,17 @@ class Test
         $password = 'admin';
         $mq       = new \MQ\Mq($endPoint, $userName, $password);
 
-        $topic   = $mq->getQueue('sms.send');
-        $message = $topic->receiveMessage(10);
+        $queue   = $mq->getQueue('sms.send');
+        $message = $queue->receiveMessage(10);
+
+        $str = '';
+        if ($message) {
+            $str = $message->getBody();
+            $queue->deleteMessage($message);
+        }
 
         print_r($message);
+        print_r($str);
     }
 }
 

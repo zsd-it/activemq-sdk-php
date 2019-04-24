@@ -3,6 +3,7 @@
 namespace Mq;
 
 use Enqueue\Stomp\StompConnectionFactory;
+use Enqueue\Stomp\StompMessage;
 use Mq\Exception\MqException;
 
 class MqClient
@@ -91,7 +92,7 @@ class MqClient
     }
 
     /**
-     * 收到消息
+     * 接收消息
      *
      * @param $topicName
      *
@@ -102,12 +103,20 @@ class MqClient
         $consumer = $this->context->createConsumer($this->context->createQueue($topicName));
         $message  = $consumer->receive($pollingWaitSeconds);
 
-        //确认收到消息
-        if (!is_null($message)) {
-            $consumer->acknowledge($message);
-        }
-
         return $message;
+    }
+
+    /**
+     * 删除消息
+     *
+     * @param                             $topicName
+     * @param \Enqueue\Stomp\StompMessage $message
+     */
+    public function deleteMessage($topicName, StompMessage $message)
+    {
+        $consumer = $this->context->createConsumer($this->context->createQueue($topicName));
+        //确认处理消息
+        $consumer->acknowledge($message);
     }
 
     //=============================================topic operation================================================
