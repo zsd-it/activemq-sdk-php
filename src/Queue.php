@@ -30,9 +30,37 @@ class Queue
      *
      * @return boolean
      */
-    public function sendMessage($message)
+    public function sendMessage($message, $delaySeconds = 3)
     {
         return $this->MqClient->sendToQueue($this->queueName, $message);
+    }
+
+    /**
+     * 批量发送
+     *
+     * @param     $messages
+     * @param int $delaySeconds
+     *
+     * @return array|null
+     */
+    public function sendBatchMessage($messages, $delaySeconds = 3)
+    {
+        if (count($messages) > 16) {
+            throw new MqException('批量推送消息数,不能大于16, 当前 : ' . count($messages));
+        }
+
+        $error = [];
+        foreach ($messages as $key => $item) {
+            if (!$this->sendMessage($item, $delaySeconds)) {
+                $error[] = $key;
+            }
+        }
+
+        if (count($error) > 0) {
+            return $error;
+        }
+
+        return null;
     }
 
     /**
@@ -50,6 +78,33 @@ class Queue
     }
 
     /**
+     * 批量拉取消息
+     *
+     * @param     $messageCount
+     * @param int $pollingWaitSeconds
+     *
+     * @return array
+     */
+    public function batchReceiveMessage($messageCount, $pollingWaitSeconds = 3)
+    {
+        if ($messageCount > 16 || $messageCount < 1) {
+            throw new MqException('参数 messageCount 不能小于1大于16');
+        }
+
+        $messages = [];
+        for ($i = 0; $i < $messageCount; $i++) {
+            $message = $this->MqClient->receiveMessage($this->queueName, $pollingWaitSeconds);
+            if (!is_null($message)) {
+                $messages[] = $message;
+            } else {
+                break;
+            }
+        }
+
+        return $messages;
+    }
+
+    /**
      * 删除消息
      *
      * @param \Enqueue\Stomp\StompMessage $message
@@ -59,7 +114,32 @@ class Queue
         if ($message instanceof StompMessage) {
             $this->MqClient->deleteMessage($this->queueName, $message);
         } else {
-            throw new MqException('消息格式不正确');
+            throw new MqException('消息删除失败, 消息必须是StompMessage object');
         }
+    }
+
+    /**
+     * 批量删除消息 ,返回删除失败的key
+     *
+     * @param $messages
+     *
+     * @return array | null
+     */
+    public function deleteBatchMessage($messages)
+    {
+        $errors = [];
+        foreach ($messages as $key => $message) {
+            if ($message instanceof StompMessage) {
+                $this->MqClient->deleteMessage($this->queueName, $message);
+            } else {
+                $errors[] = $key;
+            }
+        }
+
+        if (count($errors) > 0) {
+            return $errors;
+        }
+
+        return null;
     }
 }

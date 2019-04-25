@@ -92,6 +92,32 @@ class MqClient
     }
 
     /**
+     * 批量发送消息
+     * @param $name
+     * @param $messages
+     *
+     * @return bool
+     */
+    public function batchSendToQueue($name, $messages)
+    {
+        try {
+            $name     = '/queue/' . $name;
+            $producer = $this->context->createProducer();
+
+            foreach ($messages as $item) {
+                $producer->send(
+                    $this->context->createQueue($name),
+                    $this->context->createMessage($item)
+                );
+            }
+        } catch (\Exception $exception) {
+            throw  new MqException($exception->getMessage());
+        }
+
+        return true;
+    }
+
+    /**
      * 接收消息
      *
      * @param $topicName

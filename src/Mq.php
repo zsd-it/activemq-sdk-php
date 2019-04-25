@@ -16,9 +16,9 @@ class Mq
      * @param     $password       string 用户password
      * @param int $timeoutSeconds 请求MqApi超时时间，默认为1秒
      */
-    public function __construct($endPoint, $userName, $password, $port = 61613)
+    public function __construct($endPoint, $userName, $password, $timeoutSeconds = 3, $port = 61613)
     {
-        $this->MqClient = new MqClient($endPoint, $port, $userName, $password, $timeoutSeconds = 3);
+        $this->MqClient = new MqClient($endPoint, $port, $userName, $password, $timeoutSeconds);
     }
 
     /**

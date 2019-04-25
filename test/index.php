@@ -6,17 +6,18 @@
  * Time: 下午8:47
  */
 
-$vendor = dirname(__FILE__) . '/../vendor/autoload.php';
+$dir    = dirname(__FILE__);
+$vendor = $dir . '/../vendor/autoload.php';
 
 require_once $vendor;
 
-include '../src/Mq.php';
-include '../src/MqClient.php';
-include '../src/Queue.php';
-include '../src/Topic.php';
-include '../src/Exception/MqException.php';
-include '../src/Exception/MqServerException.php';
-include '../src/Exception/MqClientException.php';
+include $dir . '/../src/Mq.php';
+include $dir . '/../src/MqClient.php';
+include $dir . '/../src/Queue.php';
+include $dir . '/../src/Topic.php';
+include $dir . '/../src/Exception/MqException.php';
+include $dir . '/../src/Exception/MqServerException.php';
+include $dir . '/../src/Exception/MqClientException.php';
 
 class Test
 {
@@ -32,6 +33,20 @@ class Test
         $topic->publishMessage($message);
     }
 
+    public function batchSendTopic($count)
+    {
+        $endPoint = 'localhost';
+        $userName = 'admin';
+        $password = 'admin';
+        $mq       = new \MQ\Mq($endPoint, $userName, $password);
+
+        $topic   = $mq->getTopic('sms.send');
+        for ($i = 0; $i < $count; $i++) {
+            $messages[] = 'test ' . date('Y-m-d H:i:s');
+        }
+        var_dump($topic->publishBatchMessage($messages));
+    }
+
     public function sendQueue()
     {
         $endPoint = 'localhost';
@@ -44,6 +59,22 @@ class Test
         $topic->sendMessage($message);
     }
 
+    public function batchSendQueue($count)
+    {
+        $endPoint = 'localhost';
+        $userName = 'admin';
+        $password = 'admin';
+        $mq       = new \Mq\Mq($endPoint, $userName, $password);
+
+        $topic    = $mq->getQueue('sms.send');
+        $messages = [];
+        for ($i = 0; $i < $count; $i++) {
+            $messages[] = 'test ' . date('Y-m-d H:i:s');
+        }
+
+        $topic->sendBatchMessage($messages);
+    }
+
     public function getQueue()
     {
         $endPoint = 'localhost';
@@ -52,7 +83,7 @@ class Test
         $mq       = new \MQ\Mq($endPoint, $userName, $password);
 
         $queue   = $mq->getQueue('sms.send');
-        $message = $queue->receiveMessage(10);
+        $message = $queue->receiveMessage(0);
 
         $str = '';
         if ($message) {
@@ -63,9 +94,37 @@ class Test
         print_r($message);
         print_r($str);
     }
+
+    public function getBatchQueue($count)
+    {
+        $endPoint = 'localhost';
+        $userName = 'admin';
+        $password = 'admin';
+        $mq       = new \MQ\Mq($endPoint, $userName, $password);
+
+        $queue    = $mq->getQueue('sms.send');
+        $messages = $queue->batchReceiveMessage($count);
+
+        $str = [];
+        foreach ($messages as $message) {
+            $str[] = $message->getBody();
+        }
+
+        $queue->deleteBatchMessage($messages);
+
+        print_r($str);
+        print_r($messages);
+    }
 }
 
 $test = new Test();
-$test->sendQueue();
+//$test->sendQueue();
+
+$test->batchSendTopic(5);
 
 //$test->getQueue();
+
+//$test->batchSendQueue(16);
+
+//$test->getBatchQueue(5);
+
