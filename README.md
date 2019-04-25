@@ -84,6 +84,7 @@ foreach($msgList as $msg) {
 ```
 
 参数
+* $messageCount : 批量获取的条数
 * pollingWaitSeconds: 长连接等待时长（秒) ,默认 3 秒 . 如果是0代表一直等待拉取.
 
 返回值：
@@ -133,6 +134,7 @@ $topic->publishBatchMessage($messages, $tagList, $routingKey, $delaySeconds);
 ```
 参数：
 * message(s)：消息内容（列表），字符串类型
+* $tagList, $routingKey, $delaySeconds : 可选参数, 这里仅仅为了与Qbus参数保持一致 ,该参数实际没有用处
 
 
 返回值：
